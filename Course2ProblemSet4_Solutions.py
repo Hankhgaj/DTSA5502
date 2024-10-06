@@ -355,47 +355,58 @@ class DirectedGraphFromImage:
 # dest - a vertex that is the destination (i,j) pixel coordinates
 def computeShortestPath( graph, source_coordinates, dest_coordinates):
     # your code here
-    distance = 0
-    u = None
-    #1
+    # 1. Inicializar una cola de prioridad vacía
     queue = PriorityQueue()
-    #2
+    
+    # 2. Obtener el vértice fuente
     source = graph.get_vertex_from_coords(source_coordinates[0], source_coordinates[1])
-    #3
+    
+    # 3. Establecer la distancia de source a 0
     source.d = 0
-    #4
+    
+    # 4. Agregar el vértice fuente a la cola de prioridad
     queue.insert(source)
-    #5
-    while(queue.is_empty() != True):
-        #5.1
+    
+    # 5. Mientras la cola de prioridad no esté vacía
+    while not queue.is_empty():
+        # 5.1 Obtener el vértice con el valor mínimo de d y eliminarlo
         u = queue.get_and_delete_min()
-        #5.2
+        
+        # 5.2 Marcar el vértice como procesado
         u.processed = True
-        #5.3
-        if(u.x == dest_coordinates[0] and u.y == dest_coordinates[1]):
-            #5.3.1
+
+        # 5.3 Comprobar si u tiene las mismas coordenadas que el destino
+        if u.x == dest_coordinates[0] and u.y == dest_coordinates[1]:
+            # 5.3.1 La distancia del camino más corto es u.d
             distance = u.d
             break
-        #5.4
+        
+        # 5.4 Para cada arista saliente desde u hacia v con peso w
         edges = graph.get_list_of_neighbors(u)
         for (v, w) in edges:
-            #5.4.1
-            if(v.processed == False and v.d > u.d + w):
-                #5.4.1.1
+            # 5.4.1 Si v no ha sido procesado y se puede mejorar la distancia
+            if not v.processed and v.d > u.d + w:
+                # 5.4.1.1 Actualizar v.d y establecer el predecesor de v
                 v.d = u.d + w
-                v.pi = u
-                #5.4.1.2
-                if(v not in queue.q):
+                v.pi = u  # Establecer el predecesor del vecino
+
+                # 5.4.1.2 Si v no está ya en la cola de prioridad, insertarlo
+                if not hasattr(queue, 'vertex_set'):
+                    queue.vertex_set = set()  # Inicializar el conjunto la primera vez que se accede
+                if v not in queue.vertex_set:
                     queue.insert(v)
-                #5.4.1.3
+                    queue.vertex_set.add(v)  # Agregar a vertex_set
                 else:
+                    # 5.4.1.3 Actualizar el peso del vértice en la cola
                     queue.update_vertex_weight(v)
-    #6
+
+    # 6. Reconstruir el camino desde el destino hasta el origen
     path = []
-    while(u != None):
+    while u is not None:
         path.insert(0, (u.x, u.y))
         u = u.pi
-    #7
+
+    # 7. Retornar el camino y la distancia del camino más corto
     return (path, distance)
 
 
